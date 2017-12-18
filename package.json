@@ -1,0 +1,14 @@
+{
+  "name": "koa-pm2-project",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "axios": "0.17.1",
+    "express": "4.16.2",
+    "xss": "^0.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node ./bin/start.js"
+  }
+}
