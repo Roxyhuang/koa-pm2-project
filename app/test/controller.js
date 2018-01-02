@@ -17,5 +17,10 @@ router.get('/3', (request, response) => {
   response.send(xss(JSON.stringify(data)));
 });
 
+router.post('/4', (request, response) => {
+  const data = { test: 4 };
+  response.send(xss(JSON.stringify(data)));
+});
+
 
 module.exports = router;
