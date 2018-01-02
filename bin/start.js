@@ -3,8 +3,7 @@ const xss = require('xss');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const winston = require('winston');
-const expressWinston = require('express-winston');
+const { logger, accessWinston } = require('../utils/logUtils');
 const test = require('../app/test/controller');
 
 const port = process.argv[2] || 4000;
@@ -16,13 +15,6 @@ if(!port) {
 	console.error('must have a port');
 	console.error('server run failed');
 }
-
-const logger = winston.createLogger({
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
-});
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -42,20 +34,7 @@ app.use(function(req, res, next) {
 
 app.disable('x-powered-by');
 
-app.use(expressWinston.logger({
-  winstonInstance: logger,
-  transports: [
-    new winston.transports.Console({
-      json: true,
-      colorize: true
-    })
-  ],
-  meta: true, // optional: control whether you want to log the meta data about the request (default to true)
-  msg: "HTTP {{req.method}} {{req.url}}", // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}"
-  expressFormat: true, // Use the default Express/morgan request formatting. Enabling this will override any msg if true. Will only output colors with colorize set to true
-  colorize: false, // Color the text and status code, using the Express/morgan color palette (text: gray, status: default green, 3XX cyan, 4XX yellow, 5XX red).
-  ignoreRoute: function (req, res) { return false; } // optional: allows to skip some log messages based on request and/or response
-}));
+app.use(accessWinston);
 
 app.get(contextPath, (request, response) => {
   logger.info('Hello World!');

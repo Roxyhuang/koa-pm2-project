@@ -1,3 +1,4 @@
 {
-  "contextPath": "/neo-express"
+  "contextPath": "/neo-express",
+  "accessLogPath": ""
 }
