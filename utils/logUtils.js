@@ -1,17 +1,23 @@
-const winston = require('winston');
+const { createLogger, format, transports } = require('winston');
+const { combine, timestamp, label, printf } = format;
 const expressWinston = require('express-winston');
 
-const logger = winston.createLogger({
+const logger = createLogger({
+  format: format.combine(
+      format.splat(),
+      format.simple()
+  ),
   transports: [
-    new winston.transports.Console(),
+    new transports.Console(),
     // new winston.transports.File({ filename: '/Users/neo/opt/log/access.log' })
   ]
 });
 
-const accessLog = winston.createLogger({
+const accessLog = createLogger({
+  format: timestamp(),
   transports: [
     // new winston.transports.Console(),
-    new winston.transports.File({ filename: '/Users/neo/opt/log/access.log' })
+    new transports.File({ filename: '/Users/neo/opt/log/access.log' })
   ]
 });
 

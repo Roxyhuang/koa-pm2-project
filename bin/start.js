@@ -37,7 +37,7 @@ app.disable('x-powered-by');
 app.use(accessWinston);
 
 app.get(contextPath, (request, response) => {
-  logger.info('Hello World!');
+  logger.log('info','Hello World!');
   response.send('start');
 });
 
