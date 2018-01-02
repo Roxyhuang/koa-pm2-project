@@ -1,18 +1,32 @@
 const express = require('express');
 const xss = require('xss');
 const app = express();
-const service = require('./service.js');
-const $ = require('axios');
-
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const winston = require('winston');
+const expressWinston = require('express-winston');
+const test = require('../app/test/controller');
 
 const port = process.argv[2] || 4000;
 
+const contextPath = require('../config/config.json').contextPath;
 console.log(`express start in ${port}`);
 
 if(!port) {
 	console.error('must have a port');
 	console.error('server run failed');
 }
+
+const logger = winston.createLogger({
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+});
+
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(cookieParser());//使用req.cookies获取cookie信息
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -28,105 +42,27 @@ app.use(function(req, res, next) {
 
 app.disable('x-powered-by');
 
-app.get('/', (request, response) => {
+app.use(expressWinston.logger({
+  winstonInstance: logger,
+  transports: [
+    new winston.transports.Console({
+      json: true,
+      colorize: true
+    })
+  ],
+  meta: true, // optional: control whether you want to log the meta data about the request (default to true)
+  msg: "HTTP {{req.method}} {{req.url}}", // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}"
+  expressFormat: true, // Use the default Express/morgan request formatting. Enabling this will override any msg if true. Will only output colors with colorize set to true
+  colorize: false, // Color the text and status code, using the Express/morgan color palette (text: gray, status: default green, 3XX cyan, 4XX yellow, 5XX red).
+  ignoreRoute: function (req, res) { return false; } // optional: allows to skip some log messages based on request and/or response
+}));
+
+app.get(contextPath, (request, response) => {
+  logger.info('Hello World!');
   response.send('start');
 });
 
-/**
- * type 沪深股`
- */
-app.get('/hs/:page', (request, response) => {
-	const page = xss(request.params.page);
-
-
-	service.getHsData(page).then((res) => {
-	
-		response.send(res.data);
-	})
-});
-
-app.get('/hs_low_order/:page', (request, response) => {
-  const page = xss(request.params.page);
-
-	service.getHsData(page, 1).then((res) => {
-		response.send(res.data);
-	})
-});
-
-app.get('/hs_hybk', (request, response) => {
-	service.hs_lzbk().then((res) => {
-		response.send(res.data);
-	}) 
-});
-
-
-
-app.get('/gupiao/', (request, response) => {
-
-	//response.set('Content-Type', 'application/x-javascript; charset=GBK');
-	
-	const detail = xss(request.query.detail);
-
-
-	service.getDetail(detail).then((res) => {
-		response.set('Content-Type', 'application/x-javascript; charset=utf-8');
-		response.send(res.data);
-	})
-});
-
-
-
-/**
- * type 港股 page, num ,sort, asc, node ,dpc
- */
-
-//港股 蓝筹股 
-app.get('/gg/lc/:page', (request, response) => {
-  const page = xss(request.params.page);
-
-	service.getGgData(page, 10, 'percent', 0, 'lcg_hk', 1).then((res) => {
-		response.send(res.data);
-	})
-});
-
-//港股 国企股
-app.get('/gg/gq/:page', (request, response) => {
-  const page = xss(request.params.page);
-
-	service.getGgData(page, 10, 'percent', 0, 'gqg_hk', 1).then((res) => {
-		response.send(res.data);
-	})
-});
-
-//港股 红筹股
-app.get('/gg/hc/:page', (request, response) => {
-  const page = xss(request.params.page);
-
-	service.getGgData(page, 10, 'percent', 0, 'hcg_hk', 1).then((res) => {
-		response.send(res.data);
-	})
-});
-
-//港股 创业板
-app.get('/gg/cyb/:page', (request, response) => {
-  const page = xss(request.params.page);
-
-	service.getGgData(page, 10, 'percent', 0, 'cyb_hk', 1).then((res) => {
-		response.send(res.data);
-	})
-});
-
-
-/**
- * type 中国市场
- */
-app.get('/cnmk', (request, response) => {
-	const list = xss(request.query.list);
-	service.getCNMK(list).then((res) => {
-		response.send(res.data);
-	})
-})
-
+app.use(contextPath, test);
 
 const server = app.listen(Number(port), function () {
 	console.log('app is running host: ' + server.address().address + '\n');
