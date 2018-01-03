@@ -1,39 +1,40 @@
 const { createLogger, format, transports } = require('winston');
-const { combine, timestamp, label, printf } = format;
+const moment = require('moment');
 const expressWinston = require('express-winston');
 
+// log levels
+// {
+//   error: 0,
+//    warn: 1,
+//    info: 2,
+// }
+
 const logger = createLogger({
-  format: format.combine(
-      format.splat(),
-      format.simple()
-  ),
   transports: [
     new transports.Console(),
-    // new winston.transports.File({ filename: '/Users/neo/opt/log/access.log' })
   ]
+});
+
+const accessLogFormat = format.printf(info => {
+  return `${moment(info.timestamp).format('YYYY-MM-DD HH:mm Z')} level: ${info.level}  message: ${info.message} request: ${JSON.stringify(info.req)} response: ${JSON.stringify(info.res)}`;
 });
 
 const accessLog = createLogger({
-  format: timestamp(),
+  format: format.combine(
+      accessLogFormat
+  ),
   transports: [
-    // new winston.transports.Console(),
-    new transports.File({ filename: '/Users/neo/opt/log/access.log' })
+    new transports.File({json: true, filename: '/Users/neo/opt/log/access.log' })
   ]
 });
 
+expressWinston.requestWhitelist.push('body');
+
 const accessWinston = expressWinston.logger({
   winstonInstance: accessLog,
-  // transports: [
-  //   new winston.transports.Console({
-  //     json: true,
-  //     colorize: true
-  //   })
-  // ],
   meta: true,
-  msg: "HTTP {{req.method}} {{req.url}} {{req.body}}",
   expressFormat: true,
-  colorize: false,
-  ignoreRoute: function (req, res) { return false; }
+
 });
 
 module.exports = {logger, accessWinston};
