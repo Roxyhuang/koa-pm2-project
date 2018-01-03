@@ -12,7 +12,7 @@
     "memory-cache": "0.2.0",
     "moment": "^2.20.1",
     "request": "2.83.0",
-    "winston": "^3.0.0-rc1",
+    "winston": "2.4.0",
     "winston-daily-rotate-file": "^1.7.2",
     "xss": "^0.3.5"
   },
