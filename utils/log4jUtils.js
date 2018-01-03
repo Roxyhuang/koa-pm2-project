@@ -1,0 +1,52 @@
+/*
+  ALL: new Level(Number.MIN_VALUE, "ALL"),
+  TRACE: new Level(5000, "TRACE"),
+  DEBUG: new Level(10000, "DEBUG"),
+  INFO: new Level(20000, "INFO"),
+  WARN: new Level(30000, "WARN"),
+  ERROR: new Level(40000, "ERROR"),
+  FATAL: new Level(50000, "FATAL"),
+  MARK: new Level(9007199254740992, "MARK"), // 2^53
+  OFF: new Level(Number.MAX_VALUE, "OFF")
+ */
+
+const log4js = require('log4js');
+
+log4js.configure({
+  appenders: {
+    appFile: {
+      type: 'DateFile',
+      filename: 'app-mkt-express.log',
+      pattern: '-yyyy-MM-dd.log',
+      alwaysIncludePattern: true,
+      layout: {
+        type: 'pattern',
+        pattern: '%d{[yyyy-MM-dd hh:mm ss]} [%p] %c - %m '
+      }
+    },
+    accessFile: {
+      type: 'DateFile',
+      filename: 'access.log',
+      pattern: '-yyyy-MM-dd.log',
+      alwaysIncludePattern: true,
+      layout: {
+        type: 'pattern',
+        pattern: '%d{[yyyy-MM-dd hh:mm ss]} [%p] %c - %m '
+      }
+    },
+  },
+  categories: {
+    default: { appenders: [ 'appFile' ], level: 'info' },
+    access: { appenders: [ 'accessFile' ], level: 'info' }
+  }
+});
+
+const accessLogger = log4js.getLogger('access');
+
+const logger = log4js.getLogger('default');
+
+logger.level = 'info';
+
+accessLogger.level = 'info';
+
+module.exports =  {logger, accessLogger };

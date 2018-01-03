@@ -1,9 +1,12 @@
 const express = require('express');
 const xss = require('xss');
+const util = require('util');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { logger, accessWinston } = require('../utils/logUtils');
+const log4js = require('log4js');
+const { accessLogger } = require('../utils/log4jUtils');
+// const { z } = require('../utils/log4jUtils');
 const test = require('../app/test/controller');
 
 const port = process.argv[2] || 4000;
@@ -34,10 +37,12 @@ app.use(function(req, res, next) {
 
 app.disable('x-powered-by');
 
-app.use(accessWinston);
+app.use(log4js.connectLogger(accessLogger, { level: log4js.levels.INFO, format:function(req, res){
+  return `request: ${JSON.stringify(req.headers)}`
+}}));
 
 app.get(contextPath, (request, response) => {
-  logger.log('info','Hello World!');
+  console.log('start');
   response.send('start');
 });
 

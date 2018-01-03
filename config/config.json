@@ -1,4 +1,6 @@
 {
+  "name": "",
   "contextPath": "/neo-express",
-  "accessLogPath": ""
+  "logPath": "~/opt/log/",
+  "dev": false
 }
