@@ -11,13 +11,15 @@
  */
 
 const log4js = require('log4js');
+const isDebugger = require('../config/config.json').isDebugger || false;
+const logPath = require('../config/config.json').logPath;
 
 log4js.configure({
   appenders: {
     appFile: {
       type: 'DateFile',
-      filename: 'app-mkt-express.log',
-      pattern: '-yyyy-MM-dd.log',
+      filename: `${logPath}/app-mkt-express`,
+      pattern: '.yyyy-MM-dd.log',
       alwaysIncludePattern: true,
       layout: {
         type: 'pattern',
@@ -26,27 +28,41 @@ log4js.configure({
     },
     accessFile: {
       type: 'DateFile',
-      filename: 'access.log',
-      pattern: '-yyyy-MM-dd.log',
+      filename: `${logPath}/access`,
+      pattern: '.yyyy-MM-dd.log',
       alwaysIncludePattern: true,
       layout: {
         type: 'pattern',
         pattern: '%d{[yyyy-MM-dd hh:mm ss]} [%p] %c - %m '
       }
     },
+    console: {
+      type: 'console',
+      alwaysIncludePattern: true,
+      layout: {
+        type: 'pattern',
+        pattern: '%d{[yyyy-MM-dd hh:mm ss]} [%p] %c - %m '
+      }
+    }
   },
   categories: {
     default: { appenders: [ 'appFile' ], level: 'info' },
-    access: { appenders: [ 'accessFile' ], level: 'info' }
+    access: { appenders: [ 'accessFile' ], level: 'info' },
+    defaultDev: { appenders: [ 'console' ], level: 'debug' },
+    accessDev: { appenders: [ 'console' ], level: 'debug' },
   }
 });
 
-const accessLogger = log4js.getLogger('access');
+let accessLogger;
 
-const logger = log4js.getLogger('default');
+let logger;
 
-logger.level = 'info';
-
-accessLogger.level = 'info';
+if(isDebugger) {
+  accessLogger = log4js.getLogger('accessDev');
+  logger = log4js.getLogger('defaultDev');
+} else {
+  accessLogger = log4js.getLogger('access');
+  logger = log4js.getLogger('default');
+}
 
 module.exports =  {logger, accessLogger };
