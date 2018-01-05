@@ -1,11 +1,8 @@
 const express = require('express');
-const xss = require('xss');
-const util = require('util');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const log4js = require('log4js');
-const { logger, accessLogger } = require('../utils/log4jUtils');
+const { logger, accessLoggerMiddle } = require('../utils/log4jUtils');
 const test = require('../app/test/controller');
 
 const port = process.argv[2] || 4000;
@@ -36,10 +33,7 @@ app.use(function(req, res, next) {
 
 app.disable('x-powered-by');
 
-app.use(log4js.connectLogger(accessLogger, { level: log4js.levels.INFO, format: function(req,res){
-  return `${req.ip} ${req.method} ${req.url} ${req.url} HTTP/: ${req.httpVersionMajor}.${req.httpVersionMinor} ${res.statusCode} ${res.getHeader('Content-Length', 10)} `
-}}));
-
+app.use(accessLoggerMiddle);
 
 app.get(contextPath, (request, response) => {
   logger.info('start');

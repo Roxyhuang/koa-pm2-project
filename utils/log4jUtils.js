@@ -11,6 +11,7 @@
  */
 
 const log4js = require('log4js');
+const { filterPhone } = require('./filterUtils');
 const isDebugger = require('../config/config.json').isDebugger || false;
 const logPath = require('../config/config.json').logPath;
 
@@ -65,4 +66,8 @@ if(isDebugger) {
   logger = log4js.getLogger('default');
 }
 
-module.exports =  {logger, accessLogger };
+const accessLoggerMiddle = log4js.connectLogger(accessLogger, { level: log4js.levels.INFO, format: function(req,res){
+  return filterPhone(`${req.ip} ${req.method} ${req.url} HTTP/: ${req.httpVersionMajor}.${req.httpVersionMinor} ${res.statusCode} ${res.getHeader('Content-Length', 10)}`)
+}});
+
+module.exports =  { logger, accessLoggerMiddle };

@@ -23,7 +23,7 @@ router.get('/3', (request, response) => {
 
 router.post('/4', (request, response) => {
   const data = { test: 4 };
-  logger.info('4');
+  logger.error('4');
   response.send(xss(JSON.stringify(data)));
 });
 
